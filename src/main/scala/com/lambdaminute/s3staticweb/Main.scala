@@ -48,7 +48,7 @@ object Main extends IOApp {
 
   private val blazeBuilder: BlazeServerBuilder[IO] =
     BlazeServerBuilder[IO]
-      .bindHttp(port = 8080)
+      .bindHttp(8080, "0.0.0.0")
       .withHttpApp(authedRoutes.orNotFound)
 
   def run(args: List[String]): IO[ExitCode] =

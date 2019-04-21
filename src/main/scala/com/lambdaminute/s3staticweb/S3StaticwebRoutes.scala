@@ -45,7 +45,6 @@ class S3StaticwebRoutes[F[_]: Effect: Timer: ContextShift: Functor](
     EitherT(
       Sync[F]
         .delay {
-          println(s"key: ${key}")
           `Content-Type`
             .parse(
               s3Client.getObjectMetadata(s3Conf.bucketName, key).getContentType
@@ -67,7 +66,6 @@ class S3StaticwebRoutes[F[_]: Effect: Timer: ContextShift: Functor](
       val _ = path
       val prefix = path.toList.mkString("/")
 
-      println(s"prefix: ${prefix}")
       val request = s3Client.listObjects(
         new ListObjectsRequest()
           .withBucketName(s3Conf.bucketName)
@@ -78,7 +76,6 @@ class S3StaticwebRoutes[F[_]: Effect: Timer: ContextShift: Functor](
         request.getCommonPrefixes.asScala.toList
           .map(str => s"${str}index.html".drop(prefix.length))
       val rendered = dirListingHtml(paths).render
-      println(s"listdir: ${rendered}")
       rendered
         .getBytes(StandardCharsets.UTF_8)
     }
@@ -91,8 +88,7 @@ class S3StaticwebRoutes[F[_]: Effect: Timer: ContextShift: Functor](
         val isDir = path.toList
           .mkString("/")
           .endsWith("/") || path.toList.isEmpty
-        println(isDir)
-        println(s"path: ${path}")
+
         val r: EitherT[F, S3Error, Response[F]] = for {
           mimeType <- getMimeType(path.toList.mkString("/"))
           _ = println(mimeType)
@@ -115,15 +111,12 @@ class S3StaticwebRoutes[F[_]: Effect: Timer: ContextShift: Functor](
         r.fold(
           {
             case MimeParseError(err) =>
-              println(err)
               new Response(Status.InternalServerError)
                 .withEntity(err.getMessage())
             case S3GenericError(err) =>
-              println(err)
               new Response(Status.InternalServerError)
                 .withEntity(err.getMessage())
             case S3ServiceError(err) =>
-              println(err.awsErrorDetails().errorCode())
               new Response(
                 status = Status.apply(err.awsErrorDetails().errorCode().toInt)
               )

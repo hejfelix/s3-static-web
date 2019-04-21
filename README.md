@@ -11,7 +11,16 @@ The app requires a number of environment variables:
 * AWS_ACCESS_KEY_ID
 * AWS_SECRET_ACCESS_KEY
 * AWS_REGION
+* BUCKET_NAME
 * *_Optional_*
   * BASIC_USER 
   * BASIC_PASS
+
+# Run
+
+To run the service, export all the needed variables and issue:
+
+```bash
+docker-compose up
+```
 
